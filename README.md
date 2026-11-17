@@ -1,164 +1,37 @@
-# EchoAI – Personal AI Chatbot
+# EchoAI
 
-## Project Overview
+EchoAI is a Flask and SQLite personal assistant with private user accounts, multiple conversations, saved memories, a searchable document library, task management, Gemini tools, Google Search grounding, and browser voice controls.
 
-EchoAI is a web-based personal AI chatbot developed using Python, Flask, HTML, CSS, and JavaScript.
+## Run locally
 
-The chatbot uses the Google Gemini API to understand user questions and generate responses. It also stores previous conversations so that the chatbot can use earlier messages as context during the conversation.
+1. Use Python 3.10 or newer.
+2. Create and activate a virtual environment.
+3. Install dependencies with `pip install -r requirements.txt`.
+4. Copy `.env.example` to `.env`, then set `GOOGLE_API_KEY` and a long random `SECRET_KEY`. Keep `.env` private. `COOKIE_SECURE=0` is for local HTTP only; set it to `1` behind HTTPS.
+5. Run `python app.py` from this directory and open `http://127.0.0.1:5000`.
 
-The main aim of this project is to create a simple personal AI assistant with conversation memory and document upload functionality.
-
-## Objectives
-
-- To develop a simple AI chatbot using Google Gemini.
-- To create a web-based chatbot interface.
-- To store and use previous conversations.
-- To allow users to upload documents and ask questions about them.
-- To understand how an AI API can be connected to a web application.
-- To provide a simple and user-friendly interface.
+SQLite creates `echoai.db` on first run. Schema setup uses `CREATE TABLE IF NOT EXISTS`; it does not erase existing data. The old `memory.json` is preserved because its single shared history cannot safely be assigned to an account.
 
 ## Features
 
-### 1. AI Chat
+- Username/email login with Werkzeug password hashing and session-based access checks.
+- Separate conversations, titles based on the first message, switching, deletion, and a 10-conversation retention limit per account.
+- User-scoped memories, PDF/DOCX/TXT document library with keyword search, and task CRUD.
+- Gemini function calls for saving/searching memories and documents and managing tasks. Task deletion requested by Gemini waits for explicit confirmation; UI deletion actions also ask for confirmation.
+- Optional Google Search grounding using the Gemini API's built-in Search tool. Search availability depends on the configured model and Google API account. Grounding usage may be billable.
+- Browser speech recognition and speech synthesis where supported. Speech stays in the browser.
+- Dark/light themes, responsive sidebar, loading state, attachment previews, and upload size limits.
 
-EchoAI uses the Google Gemini API to answer questions and have a normal conversation with the user.
+No OCR or reminder delivery is implemented. Tasks can have due dates, but EchoAI does not schedule notifications.
 
-### 2. Conversation Memory
+## Tests
 
-The chatbot saves conversations in a file called `memory.json`.
+Run `pytest` from this directory. Tests use a temporary SQLite database and mock the Gemini response; they do not send requests to Google.
 
-When the user asks a new question, previous conversation messages are used as context. This allows the chatbot to remember what was discussed earlier.
+## Security notes
 
-### 3. Document Upload
-
-Users can upload supported documents such as:
-
-- PDF
-- DOCX
-- TXT
-- Markdown
-- CSV
-- JSON
-- Other text-based files
-
-The application extracts the text from the uploaded file and sends it to Gemini as context. This allows the chatbot to answer questions related to the uploaded document.
-
-### 4. Clear Memory
-
-The **Clear Memory** button removes the saved conversation from `memory.json`.
-
-This allows the user to start a fresh conversation.
-
-### 5. Conversation After Refresh
-
-The chatbot can load the previously saved conversation when the webpage is refreshed.
-
-### 6. Modern User Interface
-
-EchoAI has a dark and modern interface with:
-
-- Chat bubbles
-- User and AI messages
-- File attachment option
-- Typing indicator
-- Clear Memory button
-- Responsive design
-
-## Technologies Used
-
-| Part | Technology |
-|---|---|
-| Programming Language | Python |
-| Backend | Flask |
-| AI Model | Google Gemini |
-| AI Library | Google GenAI |
-| Frontend | HTML, CSS, JavaScript |
-| Memory Storage | JSON |
-| PDF Processing | pypdf |
-| Word File Processing | python-docx |
-| Configuration | python-dotenv |
-
-## How the Project Works
-
-The basic working of EchoAI is:
-
-1. The user enters a message in the chatbot.
-2. The message is sent to the Flask backend.
-3. The backend loads the previous conversation from `memory.json`.
-4. The previous conversation is used as context along with the new message.
-5. The request is sent to Google Gemini.
-6. Gemini generates a response.
-7. The response is shown on the website.
-8. The new conversation is saved in `memory.json`.
-
-In simple words:
-
-**User → Website → Flask → Gemini → Response → Website**
-
-## How Memory Works
-
-EchoAI uses a simple JSON file for storing conversation memory.
-
-For every conversation:
-
-- User messages are stored.
-- AI responses are stored.
-- Previous messages can be loaded again.
-- Recent conversation history is sent to Gemini as context.
-
-This allows the chatbot to remember earlier parts of the conversation.
-
-The project uses a simple file-based memory system instead of a separate database, which keeps the project easy to understand and suitable for a student project.
-
-## How Document Upload Works
-
-When a user uploads a document, the file is sent to the Flask backend.
-
-The backend reads the text from the document.
-
-For example:
-
-- PDF files are processed using `pypdf`.
-- DOCX files are processed using `python-docx`.
-- Text-based files are read directly.
-
-The extracted text is then given to Gemini as additional context.
-
-For example, a user can upload a document and ask:
-
-> "What is this document about?"
-
-The chatbot can then use the extracted document text to answer the question.
-
-## Error Handling
-
-The application contains basic error handling for common problems.
-
-For example:
-
-- If the Gemini API request fails, an error message is returned.
-- Unsupported file types are rejected.
-- Problems while reading a document are handled.
-- Empty messages or empty uploads are not processed.
-- Problems with the saved memory file are handled by the application.
-
-This prevents a single error from completely stopping the chatbot.
-
-## Project Structure
-
-```text
-EchoAI/
-│
-├── app.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-├── .env
-├── memory.json
-│
-├── templates/
-│   └── index.html
-│
-└── static/
-    ├── style.css
-    └── script.js
+- Never expose `.env` or commit it. The generated app secret fallback is only for development and invalidates sessions after a restart; set a stable `SECRET_KEY` before using the app regularly.
+- Set `COOKIE_SECURE=1` only when serving over HTTPS. Do not run Flask's development server with debug enabled in production.
+- Every private data query scopes records by the signed-in user. SQLite foreign keys cascade message deletion with conversations and user deletion with owned data.
+- Files are parsed in memory and extracted text is stored in SQLite. The app does not retain uploaded binary files.
+- Web Search is a distinct Gemini request before the custom function call, which keeps the default Gemini 2.5 model's tool use independent. If Search is unsupported or unavailable, chat continues without web context.

@@ -1,287 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Personal AI</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}"><title>EchoAI · Personal Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
-    <div class="app">
-
-        <!-- ================= HEADER ================= -->
-        <header class="topbar">
-
-            <div class="brand">
-                <div class="brand-icon">
-                    ✦
-                </div>
-
-                <div>
-                    <h1>EchoAI</h1>
-                    <p>Powered by Gemini</p>
-                </div>
-            </div>
-
-
-            <div class="header-right">
-
-                <div class="model-badge">
-                    <span class="model-dot">✦</span>
-                    <span>Gemini AI</span>
-                </div>
-
-                <!-- KEEPING YOUR CLEAR MEMORY FEATURE -->
-                <button
-                    id="clearMemoryBtn"
-                    class="clear-memory-btn"
-                    type="button"
-                    title="Clear conversation memory">
-
-                    <span class="trash-icon">⌫</span>
-                    Clear Memory
-
-                </button>
-
-            </div>
-
-        </header>
-
-
-        <!-- ================= MAIN CHAT AREA ================= -->
-        <main class="main">
-
-            <section class="chat-panel">
-
-
-                <!-- ================= WELCOME AREA ================= -->
-
-                <div id="welcomeSection" class="welcome-section">
-
-                    <div class="welcome-icon">
-                        ✦
-                    </div>
-
-                    <h2>
-                        Hey there, <span>Aditi!</span>
-                    </h2>
-
-                    <p class="welcome-subtitle">
-                        Your personal AI assistant, powered by Gemini.
-                    </p>
-
-                    <p class="welcome-description">
-                        Ask questions, upload documents, get study help,
-                        brainstorm ideas and more.
-                    </p>
-
-
-                    <!-- These are ONLY visual hints.
-                         They do NOT add new features. -->
-
-                    <div class="feature-row">
-
-                        <div class="feature-card">
-                            <div class="feature-icon purple">
-                                💬
-                            </div>
-
-                            <div>
-                                <strong>Ask anything</strong>
-                                <small>Chat with your AI</small>
-                            </div>
-                        </div>
-
-
-                        <div class="feature-card">
-                            <div class="feature-icon blue">
-                                📄
-                            </div>
-
-                            <div>
-                                <strong>Upload documents</strong>
-                                <small>Ask about your files</small>
-                            </div>
-                        </div>
-
-
-                        <div class="feature-card">
-                            <div class="feature-icon orange">
-                                ✦
-                            </div>
-
-                            <div>
-                                <strong>Get answers</strong>
-                                <small>Study and learn</small>
-                            </div>
-                        </div>
-
-
-                        <div class="feature-card">
-                            <div class="feature-icon green">
-                                ◉
-                            </div>
-
-                            <div>
-                                <strong>Remembers context</strong>
-                                <small>Conversation memory</small>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ================= CHAT MESSAGES ================= -->
-
-                <div
-                    id="chatMessages"
-                    class="chat-messages"
-                    aria-live="polite">
-
-                    <!--
-                        JavaScript will place the actual
-                        conversation messages here.
-
-                        Example:
-
-                        User message
-                        Assistant message
-                        User message
-                        Assistant message
-
-                    -->
-
-                </div>
-
-
-                <!-- ================= TYPING INDICATOR ================= -->
-
-                <div
-                    id="typingIndicator"
-                    class="typing-indicator"
-                    style="display: none;">
-
-                    <div class="ai-avatar">
-                        ✦
-                    </div>
-
-                    <div class="typing-bubble">
-
-                        <span></span>
-                        <span></span>
-                        <span></span>
-
-                    </div>
-
-                </div>
-
-
-            </section>
-
-
-            <!-- ================= INPUT AREA ================= -->
-
-            <section class="composer-section">
-
-                <form
-                    id="chatForm"
-                    class="composer"
-                    enctype="multipart/form-data">
-
-
-                    <!-- ATTACH FILE BUTTON -->
-
-                    <button
-                        id="attachBtn"
-                        class="attach-btn"
-                        type="button"
-                        title="Attach a file">
-
-                        📎
-
-                    </button>
-
-
-                    <!-- REAL FILE INPUT -->
-
-                    <input
-                        id="fileInput"
-                        name="files"
-                        type="file"
-                        multiple
-                        hidden
-                        accept=".pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.log,.yaml,.yml,.xml,.html,.htm,.css,.py,.js,.ts,.tsx,.jsx,.java,.c,.cpp,.h,.hpp,.cs,.go,.rs,.rb,.php,.sh,.bat,.sql,.ini,.cfg,.toml">
-
-
-                    <!-- TEXT BOX -->
-
-                    <textarea
-                        id="messageInput"
-                        name="message"
-                        rows="1"
-                        placeholder="Ask me anything... (you can also attach files)"
-                        autocomplete="off"></textarea>
-
-
-                    <!-- SEND BUTTON -->
-
-                    <button
-                        id="sendBtn"
-                        class="send-btn"
-                        type="submit"
-                        title="Send message">
-
-                        <span>➤</span>
-
-                    </button>
-
-                </form>
-
-
-                <!-- SELECTED FILE DISPLAY -->
-
-                <div
-                    id="filePreview"
-                    class="file-preview"
-                    style="display: none;">
-
-                    <!-- JavaScript will place selected files here -->
-
-                </div>
-
-
-                <!-- FILE INFORMATION -->
-
-                <div class="composer-info">
-
-                    <span>
-                        📄 Supports PDF, DOCX, TXT, CSV, code files and more
-                    </span>
-
-                    <span class="separator">|</span>
-
-                    <span>
-                        Max file size: 25 MB
-                    </span>
-
-                </div>
-
-            </section>
-
-        </main>
-
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="brand-mark">✦</span><div><b>EchoAI</b><small>Personal assistant</small></div></div>
+    <button class="primary wide" id="newChat">＋ New chat</button>
+    <div class="side-label">RECENT</div><nav id="conversationList" class="conversation-list" aria-label="Conversations"></nav>
+    <div class="side-bottom">
+      <button class="side-link" data-panel="memories">✧ <span>Memories</span></button>
+      <button class="side-link" data-panel="documents">▤ <span>Documents</span></button>
+      <button class="side-link" data-panel="tasks">✓ <span>Tasks</span></button>
+      <div class="profile"><div class="avatar" id="userAvatar">E</div><span id="username">Account</span><button id="themeToggle" class="icon-btn" title="Toggle light or dark theme">◐</button>
+        <form action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="icon-btn" title="Sign out">↪</button></form>
+      </div>
     </div>
-
-
-    <!-- ================= JAVASCRIPT ================= -->
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-
-</body>
-</html>
+  </aside>
+  <main class="main">
+    <header class="topbar"><button id="menuToggle" class="icon-btn mobile-only" aria-label="Open menu">☰</button><div><strong id="chatTitle">New chat</strong><small class="status">● Gemini assistant</small></div><div class="top-actions"><label class="search-toggle"><input type="checkbox" id="searchToggle"> Search web</label></div></header>
+    <section id="chatPanel" class="chat-panel">
+      <div id="welcome" class="welcome"><div class="welcome-mark">✦</div><h1>What can I help with?</h1><p>Ask a question, explore an idea, or work with your personal library.</p><div class="suggestions"><button>Help me plan my week</button><button>Remember my preferences</button><button>Summarize a document</button></div></div>
+      <div id="messages" class="messages" aria-live="polite"></div>
+      <div id="typing" class="typing hidden">EchoAI is thinking<span>•••</span></div>
+    </section>
+    <div class="composer-wrap"><div id="filePreview" class="file-preview"></div><form id="chatForm" class="composer"><button type="button" id="attachBtn" class="icon-btn" title="Attach files">＋</button><input id="fileInput" type="file" multiple hidden accept=".pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.log,.yaml,.yml,.xml,.html,.htm,.css,.py,.js,.ts,.tsx,.jsx,.java,.c,.cpp,.h,.hpp,.cs,.go,.rs,.rb,.php,.sh,.bat,.sql,.ini,.cfg,.toml"><textarea id="messageInput" rows="1" placeholder="Message EchoAI…"></textarea><button type="button" id="micBtn" class="icon-btn" title="Speak your message">🎙</button><button type="submit" id="sendBtn" class="send-btn" aria-label="Send">↑</button></form><div class="composer-foot">PDF, DOCX, TXT and text files · 10 MB per file <span id="voiceStatus"></span></div></div>
+  </main>
+</div>
+<div id="panelBackdrop" class="backdrop hidden"></div>
+<aside id="drawer" class="drawer" aria-label="Assistant library"><div class="drawer-head"><h2 id="drawerTitle">Memories</h2><button id="closeDrawer" class="icon-btn">×</button></div><div id="drawerBody"></div></aside>
+<div id="toast" class="toast" role="status"></div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body></html>

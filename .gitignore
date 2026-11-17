@@ -1,15 +1,6 @@
 # Secrets & local memory
 .env
-.env.*
-!.env.example
 memory.json
-*.db
-*.sqlite
-*.sqlite3
-echoai.db-shm
-echoai.db-wal
-instance/
-uploads/
 
 # Python
 __pycache__/
